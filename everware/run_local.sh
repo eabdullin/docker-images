@@ -16,17 +16,22 @@
 # Then adjust the name of CONTAINER below to match the name and tag
 # to match the name of the docker image you built.
 #
-set -e
-WORKDIR=`pwd`
+JPY_API_TOKEN="token"
+JPY_USER="jupyter"
+JPY_COOKIE_NAME="default-cookie"
+JPY_BASE_URL="http://192.168.99.100/"
+JPY_HUB_PREFIX="hubprefix"
+JPY_HUB_API_URL=""
 
+WORKDIR=`pwd`
 CONTAINER="eabdullin/everware-miniconda"
 
 # Directory inside the container which will contain the analysis code
-JUP_DIR="/home/jupyter/analysis"
-
+NOTEBOOK_DIR="/home/jupyter/analysis"
+echo $WORKDIR:$NOTEBOOK_DIR
 # Unclear why exactly you need to run the notebook with `sh -c`
 # Found this solution from ipython/ipython#7062 and ipython/docker-notebook#6
-container_id=`docker run -d -v $WORKDIR:$JUP_DIR -p 8888 $CONTAINER sh -c "ipython notebook --port=8888 --ip=0.0.0.0 --no-browser --notebook-dir=$JUP_DIR"`
+container_id=`docker run -v $WORKDIR:$NOTEBOOK_DIR -p 8080:8888 $CONTAINER sh -c "jupyterhub-singleuser --port=8888 --ip=0.0.0.0 --user=$JPY_USER"`
 
 if hash docker-machine 2>/dev/null; then
     connect_string=`docker port $container_id 8888 | sed -e 's/0.0.0.0/'$(docker-machine ip)'/'`
